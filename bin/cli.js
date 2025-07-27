@@ -6,10 +6,11 @@ const { createProxyServer } = require("../lib/proxy-server");
 program
   .name("flexible-proxy")
   .description("A flexible reverse proxy server with configurable routing")
-  .version("1.0.0")
+  .version("1.1.5")
   .option("-p, --port <port>", "Port to listen on", "8000")
   .option("-h, --host <host>", "Host to bind to", "localhost")
   .option("--routes-file <file>", "Load routes from a JSON file")
+  .option("--watch", "Watch routes file for changes and auto-reload")
   .option("--verbose", "Enable verbose logging")
   .option(
     "--log-level <level>",
@@ -28,15 +29,13 @@ program
     true
   )
   .option("--no-change-origin", "Do not change the origin header")
-  .allowUnknownOption()
+  .allowUnknownOption() // Allows manual parsing of --route
   .parse();
 
 const options = program.opts();
 
 // Parse routes from command line arguments
 const routes = {};
-
-// Get all arguments after the command
 const args = process.argv.slice(2);
 let i = 0;
 while (i < args.length) {
@@ -82,6 +81,13 @@ if (Object.keys(routes).length === 0) {
   console.log(
     'Example: flexible-proxy --route "/api:http://localhost:3000" --route "/auth:https://auth.example.com"'
   );
+  console.log("Example: flexible-proxy --routes-file routes.json --watch");
+  process.exit(1);
+}
+
+// Validate watch option
+if (options.watch && !options.routesFile) {
+  console.error("--watch option requires --routes-file to be specified");
   process.exit(1);
 }
 
@@ -90,6 +96,8 @@ const server = createProxyServer({
   port: parseInt(options.port),
   host: options.host,
   routes: routes,
+  routesFile: options.routesFile,
+  watchRoutes: options.watch,
   verbose: options.verbose || options.logLevel !== "basic",
   logLevel: options.logLevel,
   preserveHeaders: options.preserveHeaders,
@@ -97,3 +105,16 @@ const server = createProxyServer({
 });
 
 server.start();
+
+// Handle graceful shutdown
+process.on("SIGINT", () => {
+  console.log("\n🛑 Shutting down proxy server...");
+  server.stop();
+  process.exit(0);
+});
+
+process.on("SIGTERM", () => {
+  console.log("\n🛑 Shutting down proxy server...");
+  server.stop();
+  process.exit(0);
+});

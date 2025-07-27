@@ -35,6 +35,9 @@ flexible-proxy --host 0.0.0.0 --port 8080 --route "/api:http://localhost:3000"
 # Load routes from file
 flexible-proxy --routes-file routes.json
 
+# Watch routes file for changes and auto-reload
+flexible-proxy --routes-file routes.json --watch
+
 # Enable verbose logging
 flexible-proxy --route "/api:http://localhost:3000" --verbose
 
@@ -56,6 +59,7 @@ flexible-proxy --help
 - `-h, --host <host>` - Host to bind to (default: localhost)
 - `-r, --route <pattern:target>` - Add a route (pattern:target). Can be used multiple times
 - `--routes-file <file>` - Load routes from a JSON file
+- `--watch` - Watch routes file for changes and auto-reload
 - `--verbose` - Enable verbose logging
 - `--log-level <level>` - Log level: basic, detailed, full (default: basic)
 - `--preserve-headers` - Preserve all original headers (default: true)
@@ -265,6 +269,25 @@ flexible-proxy \
 flexible-proxy --routes-file routes.json --log-level detailed
 ```
 
+### Watch Routes File for Changes
+
+```bash
+# Start with file watching enabled
+flexible-proxy --routes-file routes.json --watch
+
+# The server will automatically reload routes when the file changes
+# Edit routes.json and save - routes will update without restarting the server
+```
+
+**Watch Mode Features:**
+
+- Automatically detects changes to the routes file
+- Reloads routes without restarting the server
+- Validates JSON format before applying changes
+- Provides feedback on successful/failed reloads
+- Graceful error handling for invalid JSON
+- Maintains current routes if file becomes invalid
+
 ## Features
 
 - **Flexible Routing**: Configure any URL pattern to any target server
@@ -273,6 +296,7 @@ flexible-proxy --routes-file routes.json --log-level detailed
 - **Complete Header Forwarding**: All headers are forwarded to target servers
 - **CORS Support**: Automatically handles CORS headers for cross-origin requests
 - **Multiple Configuration Methods**: Command line or JSON file
+- **File Watching**: Auto-reload routes when the routes file changes
 - **Error Handling**: Proper error handling for proxy failures
 - **Preflight Support**: Handles OPTIONS requests for CORS preflight
 - **Request Tracking**: Unique request IDs for tracking requests through logs
