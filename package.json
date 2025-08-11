@@ -1,6 +1,6 @@
 {
   "name": "flexible-reverse-proxy",
-  "version": "1.1.6",
+  "version": "1.2.0",
   "description": "A simple reverse proxy server with configurable routing",
   "main": "index.js",
   "bin": {
@@ -20,9 +20,10 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "http-proxy": "^1.18.1",
-    "commander": "^11.1.0",
     "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "http-proxy": "^1.18.1",
+    "path-to-regexp": "^8.2.0",
     "winston": "^3.11.0"
   },
   "engines": {
