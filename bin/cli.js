@@ -29,6 +29,7 @@ program
     true
   )
   .option("--no-change-origin", "Do not change the origin header")
+  .option("--forward-all <target>", "Forward all traffic to a specific target (e.g., http://localhost:3000)")
   .allowUnknownOption() // Allows manual parsing of --route
   .parse();
 
@@ -73,16 +74,38 @@ if (options.routesFile) {
   }
 }
 
-// If no routes specified, show help
-if (Object.keys(routes).length === 0) {
-  console.log(
-    "No routes specified. Use --route or --routes-file to configure routes."
-  );
-  console.log(
-    'Example: flexible-proxy --route "/api:http://localhost:3000" --route "/auth:https://auth.example.com"'
-  );
-  console.log("Example: flexible-proxy --routes-file routes.json --watch");
-  process.exit(1);
+// Validate configuration
+if (options.forwardAll) {
+  // Forward-all mode: validate target format
+  try {
+    new URL(options.forwardAll);
+  } catch (error) {
+    console.error(`Invalid forward-all target: ${options.forwardAll}. Must be a valid URL (e.g., http://localhost:3000)`);
+    process.exit(1);
+  }
+  
+  // In forward-all mode, routes are ignored
+  if (Object.keys(routes).length > 0) {
+    console.log("⚠️  Warning: Routes specified but --forward-all is active. All traffic will be forwarded to the target.");
+  }
+  
+  if (options.watch) {
+    console.error("--watch option is not compatible with --forward-all mode");
+    process.exit(1);
+  }
+} else {
+  // Route-based mode: require routes
+  if (Object.keys(routes).length === 0) {
+    console.log(
+      "No routes specified. Use --route, --routes-file, or --forward-all to configure proxy."
+    );
+    console.log(
+      'Example: flexible-proxy --route "/api:http://localhost:3000" --route "/auth:https://auth.example.com"'
+    );
+    console.log("Example: flexible-proxy --routes-file routes.json --watch");
+    console.log("Example: flexible-proxy --forward-all http://localhost:3000");
+    process.exit(1);
+  }
 }
 
 // Validate watch option
@@ -102,6 +125,7 @@ const server = createProxyServer({
   logLevel: options.logLevel,
   preserveHeaders: options.preserveHeaders,
   changeOrigin: options.changeOrigin,
+  forwardAll: options.forwardAll,
 });
 
 server.start();

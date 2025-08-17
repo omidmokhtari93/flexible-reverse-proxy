@@ -26,6 +26,9 @@ After global installation, you can use the `flexible-proxy` command:
 # Basic usage with routes
 flexible-proxy --route "/api:http://localhost:3000" --route "/auth:https://auth.example.com"
 
+# Forward ALL traffic to a specific target
+flexible-proxy --forward-all http://localhost:3000
+
 # Custom port
 flexible-proxy --port 3000 --route "/api:http://localhost:3000"
 
@@ -59,6 +62,7 @@ flexible-proxy --help
 - `-h, --host <host>` - Host to bind to (default: localhost)
 - `-r, --route <pattern:target>` - Add a route (pattern:target). Can be used multiple times
 - `--routes-file <file>` - Load routes from a JSON file
+- `--forward-all <target>` - Forward ALL traffic to a specific target (e.g., http://localhost:3000)
 - `--watch` - Watch routes file for changes and auto-reload
 - `--verbose` - Enable verbose logging
 - `--log-level <level>` - Log level: basic, detailed, full (default: basic)
@@ -191,6 +195,29 @@ Then use it:
 flexible-proxy --routes-file routes.json
 ```
 
+### Forward-All Mode
+
+For simple use cases where you want to forward ALL traffic to a single target, use the `--forward-all` option:
+
+```bash
+# Forward all requests to a single backend
+flexible-proxy --forward-all http://localhost:3000
+
+# With custom port
+flexible-proxy --port 8080 --forward-all http://localhost:3000
+
+# With detailed logging
+flexible-proxy --forward-all http://localhost:3000 --log-level detailed
+```
+
+This mode is useful for:
+- Simple load balancing
+- Development environments
+- Testing scenarios
+- When you don't need complex routing logic
+
+**Note:** When using `--forward-all`, any routes specified with `--route` or `--routes-file` will be ignored, and the `--watch` option is not compatible.
+
 ### Programmatic Usage
 
 You can also use the package programmatically:
@@ -256,6 +283,20 @@ flexible-proxy \
   --no-preserve-headers
 ```
 
+### Forward-All Mode
+
+```bash
+# Simple forward proxy
+flexible-proxy --forward-all http://localhost:3000
+
+# With custom configuration
+flexible-proxy \
+  --port 8080 \
+  --host 0.0.0.0 \
+  --forward-all http://localhost:3000 \
+  --log-level detailed
+```
+
 ### Load from File
 
 ```bash
@@ -291,6 +332,7 @@ flexible-proxy --routes-file routes.json --watch
 ## Features
 
 - **Flexible Routing**: Configure any URL pattern to any target server
+- **Forward-All Mode**: Forward all traffic to a single target (simple forward proxy)
 - **Pretty Logging**: Beautiful colored logs with emojis and structured output
 - **Comprehensive Logging**: Three log levels with detailed request/response information
 - **Complete Header Forwarding**: All headers are forwarded to target servers

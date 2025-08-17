@@ -1,6 +1,6 @@
 const { createProxyServer } = require("./lib/proxy-server");
 
-// Example routes configuration
+// Example 1: Route-based configuration (reverse proxy)
 const routes = {
   "/api/v1/user/": "https://apimarket.mtnirancell.ir",
   "/account/api/v1/logout/": "https://apimarket.mtnirancell.ir",
@@ -31,7 +31,7 @@ const routes = {
     "https://apimarket.mtnirancell.ir/promotion-qat",
 };
 
-// Create and start the proxy server with example configuration
+// Create and start the proxy server with route-based configuration
 const server = createProxyServer({
   port: 8000,
   host: "localhost",
@@ -40,3 +40,16 @@ const server = createProxyServer({
 });
 
 server.start();
+
+// Example 2: Forward-all configuration (forward proxy)
+// Uncomment the following to forward ALL traffic to a specific target:
+/*
+const forwardAllServer = createProxyServer({
+  port: 8001,
+  host: "localhost",
+  forwardAll: "http://localhost:3000", // All traffic goes to this target
+  verbose: true,
+});
+
+forwardAllServer.start();
+*/
